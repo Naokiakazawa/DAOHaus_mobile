@@ -1,4 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+
+final httpLink = HttpLink("https://example.com");
+
+const String readCounters = r'''
+  query ReadRepositories($nRepositories: Int!) {
+    viewer {
+      repositories(last: $nRepositories) {
+        nodes {
+          __typename
+          id
+          name
+          viewerHasStarred
+        }
+      }
+    }
+  }
+''';
+
+ValueNotifier<GraphQLClient> client = ValueNotifier(
+    GraphQLClient(cache: GraphQLCache(store: HiveStore()), link: httpLink));
 
 void main() {
   runApp(const MyApp());
@@ -10,60 +31,53 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'DAOHaus mobile demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+    return GraphQLProvider(
+        client: client,
+        child: MaterialApp(
+          title: 'DAOHaus mobile demo',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            useMaterial3: true,
+          ),
+          home: const MyHomePage(),
+        ));
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+    return Query(
+        options: QueryOptions(
+          document: gql(readCounters),
+          variables: const {
+            'counterId': 23,
+          },
+          pollInterval: const Duration(seconds: 30),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
+        builder: (QueryResult result,
+            {VoidCallback? refetch, FetchMore? fetchMore}) {
+          if (result.hasException) {
+            return Text(result.exception.toString());
+          }
+          if (result.isLoading) {
+            return const Text("Loading");
+          }
+
+          List? counters = result.data?['counter'];
+
+          if (counters == null) {
+            return const Text('no data');
+          }
+
+          return ListView.builder(
+              itemCount: counters.length,
+              itemBuilder: (context, index) {
+                final counter = counters[index];
+                return Text(counter ?? '');
+              });
+        });
   }
 }
