@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-final httpLink = HttpLink("https://api.thegraph.com/subgraphs/name/hausdao/daohaus-v3-goerli");
+final httpLink = HttpLink(
+    "https://api.thegraph.com/subgraphs/name/hausdao/daohaus-v3-goerli");
 
 const String readProposals = r'''
   query ReadProposals {
@@ -10,6 +11,7 @@ const String readProposals = r'''
         id
         proposalId
         description
+        title
       }
     }
   }
@@ -33,14 +35,17 @@ class Proposal {
   final String id;
   final String proposalId;
   final String description;
+  final String title;
 
-  Proposal({required this.id, required this.proposalId, required this.description});
+  Proposal(
+      {required this.id, required this.proposalId, required this.description, required this.title});
 
   factory Proposal.fromJson(Map<String, dynamic> json) {
     return Proposal(
       id: json['id'],
       proposalId: json['proposalId'],
       description: json['description'],
+      title: json['title']
     );
   }
 }
@@ -62,6 +67,7 @@ class MyApp extends StatelessWidget {
     return GraphQLProvider(
         client: client,
         child: MaterialApp(
+          debugShowCheckedModeBanner: false,
           title: 'DAOHaus mobile demo',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -94,20 +100,23 @@ class MyHomePage extends StatelessWidget {
             return const Text("Loading");
           }
 
-          Map<String, dynamic>? response  = result.data;
-          debugPrint('====== $response');
+          Map<String, dynamic>? response = result.data;
           if (response == null) {
             return const Text("no data");
           }
 
           DAO dao = DAO.fromJson(response['dao']);
 
-
           return ListView.builder(
               itemCount: dao.proposals.length,
               itemBuilder: (context, index) {
                 final proposal = dao.proposals[index];
-                return Text(proposal.description);
+                return Card(
+                  child: ListTile(
+                    title: Text(proposal.title),
+                    subtitle: Text(proposal.proposalId),
+                  )
+                );
               });
         });
   }
