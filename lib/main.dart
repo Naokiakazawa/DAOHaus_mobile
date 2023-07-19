@@ -1,27 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-final httpLink = HttpLink("https://example.com");
+final httpLink = HttpLink("https://api.thegraph.com/subgraphs/name/hausdao/daohaus-v3-goerli");
 
-const String readCounters = r'''
-  query ReadRepositories($nRepositories: Int!) {
-    viewer {
-      repositories(last: $nRepositories) {
-        nodes {
-          __typename
-          id
-          name
-          viewerHasStarred
-        }
+const String readProposals = r'''
+  query ReadProposals {
+    dao(id: "0xf433405d591190283050f217ba3b62a0bca018c0") {
+      proposals {
+        id
+        proposalId
+        description
       }
     }
   }
 ''';
 
+class DAO {
+  final List<Proposal> proposals;
+
+  DAO({required this.proposals});
+
+  factory DAO.fromJson(Map<String, dynamic> json) {
+    return DAO(
+      proposals: (json['proposals'] as List)
+          .map((item) => Proposal.fromJson(item))
+          .toList(),
+    );
+  }
+}
+
+class Proposal {
+  final String id;
+  final String proposalId;
+  final String description;
+
+  Proposal({required this.id, required this.proposalId, required this.description});
+
+  factory Proposal.fromJson(Map<String, dynamic> json) {
+    return Proposal(
+      id: json['id'],
+      proposalId: json['proposalId'],
+      description: json['description'],
+    );
+  }
+}
+
 ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(cache: GraphQLCache(store: HiveStore()), link: httpLink));
 
-void main() {
+void main() async {
+  await initHiveForFlutter();
   runApp(const MyApp());
 }
 
@@ -51,7 +79,7 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Query(
         options: QueryOptions(
-          document: gql(readCounters),
+          document: gql(readProposals),
           variables: const {
             'counterId': 23,
           },
@@ -66,17 +94,20 @@ class MyHomePage extends StatelessWidget {
             return const Text("Loading");
           }
 
-          List? counters = result.data?['counter'];
-
-          if (counters == null) {
-            return const Text('no data');
+          Map<String, dynamic>? response  = result.data;
+          debugPrint('====== $response');
+          if (response == null) {
+            return const Text("no data");
           }
 
+          DAO dao = DAO.fromJson(response['dao']);
+
+
           return ListView.builder(
-              itemCount: counters.length,
+              itemCount: dao.proposals.length,
               itemBuilder: (context, index) {
-                final counter = counters[index];
-                return Text(counter ?? '');
+                final proposal = dao.proposals[index];
+                return Text(proposal.description);
               });
         });
   }
