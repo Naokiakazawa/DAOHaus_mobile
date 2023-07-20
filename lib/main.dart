@@ -1,54 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'graphql/models.dart';
+import 'graphql/queries.dart';
 
 final httpLink = HttpLink(
     "https://api.thegraph.com/subgraphs/name/hausdao/daohaus-v3-goerli");
-
-const String readProposals = r'''
-  query ReadProposals {
-    dao(id: "0xf433405d591190283050f217ba3b62a0bca018c0") {
-      proposals {
-        id
-        proposalId
-        description
-        title
-      }
-    }
-  }
-''';
-
-class DAO {
-  final List<Proposal> proposals;
-
-  DAO({required this.proposals});
-
-  factory DAO.fromJson(Map<String, dynamic> json) {
-    return DAO(
-      proposals: (json['proposals'] as List)
-          .map((item) => Proposal.fromJson(item))
-          .toList(),
-    );
-  }
-}
-
-class Proposal {
-  final String id;
-  final String proposalId;
-  final String description;
-  final String title;
-
-  Proposal(
-      {required this.id, required this.proposalId, required this.description, required this.title});
-
-  factory Proposal.fromJson(Map<String, dynamic> json) {
-    return Proposal(
-      id: json['id'],
-      proposalId: json['proposalId'],
-      description: json['description'],
-      title: json['title']
-    );
-  }
-}
 
 ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(cache: GraphQLCache(store: HiveStore()), link: httpLink));
@@ -112,11 +68,10 @@ class MyHomePage extends StatelessWidget {
               itemBuilder: (context, index) {
                 final proposal = dao.proposals[index];
                 return Card(
-                  child: ListTile(
-                    title: Text(proposal.title),
-                    subtitle: Text(proposal.proposalId),
-                  )
-                );
+                    child: ListTile(
+                  title: Text(proposal.title),
+                  subtitle: Text(proposal.proposalId),
+                ));
               });
         });
   }
