@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../graphql/models.dart';
 
-class MyCard extends StatelessWidget {
+class ProposalCard extends StatelessWidget {
   final Proposal proposal;
 
-  const MyCard({super.key, required this.proposal});
+  const ProposalCard({super.key, required this.proposal});
 
   @override
   Widget build(BuildContext context) {

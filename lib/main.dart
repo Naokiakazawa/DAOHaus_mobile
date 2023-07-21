@@ -44,9 +44,6 @@ class MyHomePage extends StatelessWidget {
     return Query(
         options: QueryOptions(
           document: gql(readProposals),
-          variables: const {
-            'counterId': 23,
-          },
           pollInterval: const Duration(seconds: 30),
         ),
         builder: (QueryResult result,
@@ -65,7 +62,7 @@ class MyHomePage extends StatelessWidget {
 
           DAO dao = DAO.fromJson(response['dao']);
 
-          return MyCardList(proposals: dao.proposals);
+          return ProposalCardList(proposals: dao.proposals);
         });
   }
 }
