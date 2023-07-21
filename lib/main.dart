@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+
+import '../widgets/proposal_card_list.dart';
 import 'graphql/models.dart';
 import 'graphql/queries.dart';
 
@@ -63,16 +65,7 @@ class MyHomePage extends StatelessWidget {
 
           DAO dao = DAO.fromJson(response['dao']);
 
-          return ListView.builder(
-              itemCount: dao.proposals.length,
-              itemBuilder: (context, index) {
-                final proposal = dao.proposals[index];
-                return Card(
-                    child: ListTile(
-                  title: Text(proposal.title),
-                  subtitle: Text(proposal.proposalId),
-                ));
-              });
+          return MyCardList(proposals: dao.proposals);
         });
   }
 }
