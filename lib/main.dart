@@ -5,9 +5,6 @@ import '../widgets/proposal_card_list.dart';
 import 'graphql/models.dart';
 import 'graphql/queries.dart';
 
-final httpLink = HttpLink(
-    "https://api.thegraph.com/subgraphs/name/hausdao/daohaus-v3-goerli");
-
 ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(cache: GraphQLCache(store: HiveStore()), link: httpLink));
 

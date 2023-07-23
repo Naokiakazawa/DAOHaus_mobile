@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './proposal_detail.dart';
 import '../graphql/models.dart';
 
 class ProposalCard extends StatelessWidget {
@@ -10,8 +11,14 @@ class ProposalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        title: Text(proposal.description),
+        title: Text(proposal.title),
         subtitle: Text('Proposal ID: ${proposal.proposalId}'),
+        onTap: () => {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: ((BuildContext context) => ProposalDetail(
+                    proposal: proposal,
+                  ))))
+        },
       ),
     );
   }
