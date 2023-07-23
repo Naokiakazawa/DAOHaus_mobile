@@ -38,28 +38,41 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Query(
-        options: QueryOptions(
-          document: gql(readProposals),
-          pollInterval: const Duration(seconds: 30),
-        ),
-        builder: (QueryResult result,
-            {VoidCallback? refetch, FetchMore? fetchMore}) {
-          if (result.hasException) {
-            return Text(result.exception.toString());
-          }
-          if (result.isLoading) {
-            return const Text("Loading");
-          }
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Proposals"),
+      ),
+      body: Query(
+          options: QueryOptions(
+            document: gql(readProposals),
+            pollInterval: const Duration(seconds: 30),
+          ),
+          builder: (QueryResult result,
+              {VoidCallback? refetch, FetchMore? fetchMore}) {
+            if (result.hasException) {
+              return Text(result.exception.toString());
+            }
+            if (result.isLoading) {
+              return const Text("Loading");
+            }
 
-          Map<String, dynamic>? response = result.data;
-          if (response == null) {
-            return const Text("no data");
-          }
+            Map<String, dynamic>? response = result.data;
+            if (response == null) {
+              return const Text("no data");
+            }
 
-          DAO dao = DAO.fromJson(response['dao']);
+            DAO dao = DAO.fromJson(response['dao']);
 
-          return ProposalCardList(proposals: dao.proposals);
-        });
+            return ProposalCardList(proposals: dao.proposals);
+          }),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "home"),
+          BottomNavigationBarItem(icon: Icon(Icons.wysiwyg_outlined), label: "write"),
+          BottomNavigationBarItem(icon: Icon(Icons.account_box_rounded), label: "profile")
+        ],
+        selectedItemColor: Colors.grey,
+      ),
+    );
   }
 }
