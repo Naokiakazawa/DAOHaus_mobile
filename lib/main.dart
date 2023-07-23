@@ -71,7 +71,7 @@ class MyHomePage extends StatelessWidget {
           BottomNavigationBarItem(icon: Icon(Icons.wysiwyg_outlined), label: "write"),
           BottomNavigationBarItem(icon: Icon(Icons.account_box_rounded), label: "profile")
         ],
-        selectedItemColor: Colors.grey,
+        selectedItemColor: Colors.blueGrey[900],
       ),
     );
   }
